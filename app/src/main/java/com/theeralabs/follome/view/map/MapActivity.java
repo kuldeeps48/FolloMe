@@ -46,7 +46,6 @@ import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -151,25 +150,23 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     public void init() {
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
             FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
             mFusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
-                @Override
-                public void onSuccess(Location location) {
-                    if (location != null) {
-                        LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                        mMap.addMarker(new MarkerOptions().position(currentLocation)
-                                .title("Your Current Location"));
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18.0f));
-                        points.add(currentLocation);
-                        addUserLocationToFirebase(currentLocation);
+                        @Override
+                        public void onSuccess(Location location) {
+                            if (location != null) {
+                                LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                                mMap.addMarker(new MarkerOptions().position(currentLocation)
+                                        .title("Your Current Location"));
+                                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18.0f));
+                                points.add(currentLocation);
+                                addUserLocationToFirebase(currentLocation);
 
-                        isLocationEnabled();
-
-                    }
-                }
-            });
+                                startBackgroundService();
+                            }
+                        }
+                    });
 
         }
     }
@@ -199,9 +196,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     protected void onResume() {
         super.onResume();
         isLocationEnabled();
+        init();
     }
 
     LocationManager locationManager;
+
     private void isLocationEnabled() {
         Context mContext = this;
         locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
@@ -223,19 +222,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             });
             AlertDialog alert = alertDialog.create();
             alert.show();
-        } else {
-            AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-            alertDialog.setTitle("Confirm Location");
-            alertDialog.setMessage("Your Location is enabled, Great");
-            alertDialog.setNegativeButton("Back to interface", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                    startBackgroundService();
-                }
-            });
-            AlertDialog alert = alertDialog.create();
-            alert.show();
-        }
+        } else
+            startBackgroundService();
     }
 
     //Location Permission///////////////////////////////////////////////////////////////////////////

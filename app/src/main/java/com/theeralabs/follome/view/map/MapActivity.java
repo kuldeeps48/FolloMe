@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -57,7 +58,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private ArrayList<LatLng> points;
     private User user;
     FragmentManager manager;
-    private GoogleMap mMap;
+    private static GoogleMap mMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,6 +156,14 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
         checkPermission();
         init();
+    }
+
+    public static void addMarker(User listPerson) {
+        LatLng ln = new LatLng(listPerson.getLat(), listPerson.getLng());
+        mMap.addMarker(new MarkerOptions().position(ln)
+                .title(listPerson.getName()));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ln, 18.0f));
+        Log.d("MAP ACTIVITY", "addMarker: Marker Added at " + ln.toString());
     }
 
     public void init() {

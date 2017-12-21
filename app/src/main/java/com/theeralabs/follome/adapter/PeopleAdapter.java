@@ -37,8 +37,10 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.ViewHolder
     @Override
     public void onBindViewHolder(PeopleAdapter.ViewHolder holder, int position) {
         holder.txtName.setText(mResults.get(position).getName());
+        holder.txtEmail.setText(mResults.get(position).getEmail());
         Glide.with(mContext)
                 .load(mResults.get(position).getPhotoUri())
+                .thumbnail(0.4f)
                 .into(holder.img_photo);
     }
 
@@ -48,12 +50,13 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.ViewHolder
     }
 
     class ViewHolder extends RecyclerView.ViewHolder {
-        TextView txtName;
+        TextView txtName, txtEmail;
         ImageView img_photo;
 
         public ViewHolder(View itemView) {
             super(itemView);
             txtName = itemView.findViewById(R.id.txt_name);
+            txtEmail = itemView.findViewById(R.id.txt_email);
             img_photo = itemView.findViewById(R.id.img_photo);
         }
     }

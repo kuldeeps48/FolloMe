@@ -56,7 +56,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private static final String KEY_DIRECTION_MATRIX = "AIzaSyCuBz60QHNpCsZNgYdjWK_bdjRz9cW0_Gk";
     private ArrayList<LatLng> points;
     private User user;
-
+    FragmentManager manager;
     private GoogleMap mMap;
 
     @Override
@@ -74,16 +74,25 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                 .findFragmentById(R.id.map);
 
         FrameLayout mainLayout = findViewById(R.id.map_main_layout);
-        final FragmentManager manager = getSupportFragmentManager();
+        manager = getSupportFragmentManager();
         mainLayout.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
             @Override
             public void onSwipeRight() {
                 super.onSwipeRight();
-                manager.beginTransaction().add(R.id.map, new PeopleListFragment()).commit();
+                manager.beginTransaction().add(R.id.map, new PeopleListFragment(), "peopleList")
+                        .addToBackStack("peopleList").commit();
             }
         });
         points = new ArrayList<>();
         mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (manager.getBackStackEntryCount() > 0)
+            manager.popBackStack();
+        else
+            super.onBackPressed();
     }
 
     @Override

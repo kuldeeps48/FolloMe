@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "24473157629",
+    "firebase_url": "https://follome-50191.firebaseio.com",
+    "project_id": "follome-50191",
+    "storage_bucket": "follome-50191.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24473157629:android:3831b904263a7b9d",
+        "android_client_info": {
+          "package_name": "com.theeralabs.follome"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24473157629-1o8674k1ibs5kl9gar0ljdcrtb228h16.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEl7vgUba7H8RCZRl9FEn9g-bjfxHuow0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

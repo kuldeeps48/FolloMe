@@ -52,8 +52,8 @@ public class PeopleListFragment extends Fragment {
         return v;
     }
 
-    private void showPersonOnMap(User listPerson) {
-        MapActivity.addMarker(listPerson);
+    private void showPersonOnMap(User listPerson, int position) {
+        MapActivity.addMarker(listPerson, position);
         getActivity().getSupportFragmentManager().popBackStack();
     }
 
@@ -76,8 +76,7 @@ public class PeopleListFragment extends Fragment {
                             @Override
                             public void onItemClick(View view, int position) {
                                 User listPerson = userList.get(position);
-                                Toast.makeText(getContext(), "Clicked!", Toast.LENGTH_SHORT).show();
-                                showPersonOnMap(listPerson);
+                                showPersonOnMap(listPerson, position);
                             }
                         }));
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));

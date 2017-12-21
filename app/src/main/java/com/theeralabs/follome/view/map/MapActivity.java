@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -16,7 +18,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -34,6 +36,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.PolyUtil;
 import com.theeralabs.follome.R;
+import com.theeralabs.follome.adapter.PeopleAdapter;
 import com.theeralabs.follome.api.ApiInterface;
 import com.theeralabs.follome.api.GoogleDirectionApiClient;
 import com.theeralabs.follome.model.directionMatrix.direction.DirectionMatrix;
@@ -59,11 +62,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     private User user;
     FragmentManager manager;
     private static GoogleMap mMap;
+    private static Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
+        mContext = this;
 
         //Get user object from Intent
         Bundle bundle = getIntent().getExtras();
@@ -158,12 +163,20 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         init();
     }
 
-    public static void addMarker(User listPerson) {
-        LatLng ln = new LatLng(listPerson.getLat(), listPerson.getLng());
-        mMap.addMarker(new MarkerOptions().position(ln)
-                .title(listPerson.getName()));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(ln, 18.0f));
-        Log.d("MAP ACTIVITY", "addMarker: Marker Added at " + ln.toString());
+
+    public static void addMarker(User person, int position) {
+        // add marker to Map
+        LatLng latLng = new LatLng(person.getLat(), person.getLng());
+        Bitmap bm = BitmapFactory.decodeFile(PeopleAdapter.imgPaths.get(position));
+        Bitmap scaled = Bitmap.createScaledBitmap(bm,
+                (int) (bm.getWidth() * 0.07),
+                (int) (bm.getHeight() * 0.07), true);
+        mMap.addMarker(new MarkerOptions()
+                .icon(BitmapDescriptorFactory.fromBitmap(scaled))
+                .position(latLng)
+                // Specifies the anchor to be at a particular point in the marker image.
+                .anchor(0.5f, 1));
+
     }
 
     public void init() {

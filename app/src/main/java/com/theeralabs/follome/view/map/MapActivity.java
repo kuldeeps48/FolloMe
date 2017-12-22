@@ -9,6 +9,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -19,6 +21,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -52,6 +55,8 @@ import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST_CODE = 1;
@@ -148,12 +153,37 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         mMap.addMarker(new MarkerOptions()
                                 .icon(BitmapDescriptorFactory.fromBitmap(bm))
                                 .position(latLng)
+                                .title(getCompleteAddressString(person.getLat(), person.getLng()))
                                 // Specifies the anchor to be at a particular point in the marker image.
                                 .anchor(0.5f, 1));
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
                     }
                 });
 
+    }
+
+    private static String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(mContext, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+                Log.w("Current loction ", strReturnedAddress.toString());
+            } else {
+                Log.w("Current loction ", "No Address returned!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.w("Current loction ", "Canont get Address!");
+        }
+        return strAdd;
     }
 
     public void init() {
@@ -169,8 +199,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         public void onSuccess(Location location) {
                             if (location != null) {
                                 LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
-                                mMap.addMarker(new MarkerOptions().position(currentLocation)
-                                        .title("Your Current Location"));
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18.0f));
                                 points.add(currentLocation);
                                 addUserLocationToFirebase(currentLocation);

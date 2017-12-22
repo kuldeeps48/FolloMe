@@ -150,6 +150,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                                 .position(latLng)
                                 // Specifies the anchor to be at a particular point in the marker image.
                                 .anchor(0.5f, 1));
+                        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
                     }
                 });
 

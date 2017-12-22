@@ -18,6 +18,8 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -32,6 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.maps.android.PolyUtil;
@@ -89,6 +92,17 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         .addToBackStack("peopleList").commit();
             }
         });
+        Button btnLogout = findViewById(R.id.btn_logout);
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                mAuth.signOut();
+                Toast.makeText(MapActivity.this, "Logged Out. Goodbye", Toast.LENGTH_SHORT).show();
+                finish();
+            }
+        });
+
         points = new ArrayList<>();
         mapFragment.getMapAsync(this);
     }

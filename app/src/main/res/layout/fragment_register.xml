@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/gradient_background"
@@ -17,7 +18,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="30dp"
-        android:textColorHint="#cccccc">
+        android:textColorHint="#cccccc"
+        app:hintTextAppearance="@style/TextAppearance.AppCompat">
 
         <EditText
             android:id="@+id/edt_name"
@@ -25,7 +27,8 @@
             android:layout_height="wrap_content"
             android:backgroundTint="#ffff"
             android:drawablePadding="2dp"
-            android:hint="      Display Name"
+            android:drawableStart="@drawable/user_icon"
+            android:hint="    Your Display Name"
             android:inputType="textPersonName"
             android:textColor="#cccccc"
             android:textSize="20sp" />
@@ -35,7 +38,8 @@
     <android.support.design.widget.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColorHint="#cccccc">
+        android:textColorHint="#cccccc"
+        app:hintTextAppearance="@style/TextAppearance.AppCompat">
 
         <EditText
             android:id="@+id/edt_email"
@@ -55,7 +59,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:textColorHint="#cccccc">
+        android:textColorHint="#cccccc"
+        app:hintTextAppearance="@style/TextAppearance.AppCompat">
 
         <EditText
             android:id="@+id/edt_pass"
@@ -73,19 +78,19 @@
     <Button
         android:id="@+id/btn_register"
         android:layout_width="200dp"
-        android:layout_height="30dp"
+        android:layout_height="50dp"
         android:layout_marginTop="30dp"
         android:background="@drawable/button_shape"
         android:text="Register"
         android:textColor="#cccccc" />
 
     <ProgressBar
-        android:layout_marginTop="10dp"
         android:id="@+id/progressBar"
-        android:paddingTop="8dp"
-        android:indeterminate="true"
         style="?android:attr/progressBarStyle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:indeterminate="true"
+        android:paddingTop="8dp" />
 
 </LinearLayout>

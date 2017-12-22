@@ -113,7 +113,6 @@ public class AddPhotoFragment extends Fragment {
     private DatabaseReference myRef;
     private FirebaseDatabase database;
 
-    // TODO: 19/12/17
     private void uploadPhoto() {
         if (TextUtils.isEmpty(imageURI.toString())) {
             Toast.makeText(getActivity(), "Add an image", Toast.LENGTH_SHORT).show();
@@ -150,22 +149,7 @@ public class AddPhotoFragment extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
         Toast.makeText(getContext(), "Uploading...", Toast.LENGTH_SHORT).show();
-        uploadTask.addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                final double progress = (100.0 * taskSnapshot.getBytesTransferred())
-                        / taskSnapshot.getTotalByteCount();
-
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                                progressBar.setProgress((int) progress, true);
-                        }
-                    }.run();
-            }
-        })
-                .addOnFailureListener(new OnFailureListener() {
+        uploadTask.addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         btnSetPhoto.setEnabled(true);
@@ -186,7 +170,7 @@ public class AddPhotoFragment extends Fragment {
                         myRef.child(registeredUser.getId()).setValue(registeredUser);
 
                         //Start Map activity
-                        Intent intent = new Intent(getActivity(), MapActivity.class);
+                        Intent intent = new Intent(getContext(), MapActivity.class);
                         intent.putExtra("userObject", registeredUser);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);

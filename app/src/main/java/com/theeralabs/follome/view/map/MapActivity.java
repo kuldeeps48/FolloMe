@@ -21,6 +21,7 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -32,31 +33,18 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.maps.android.PolyUtil;
 import com.theeralabs.follome.R;
 import com.theeralabs.follome.adapter.PeopleAdapter;
-import com.theeralabs.follome.api.ApiInterface;
-import com.theeralabs.follome.api.GoogleDirectionApiClient;
-import com.theeralabs.follome.model.directionMatrix.direction.DirectionMatrix;
-import com.theeralabs.follome.model.directionMatrix.direction.Leg;
-import com.theeralabs.follome.model.directionMatrix.direction.Route;
-import com.theeralabs.follome.model.directionMatrix.direction.Step;
 import com.theeralabs.follome.model.directionMatrix.user.User;
 import com.theeralabs.follome.util.OnSwipeTouchListener;
 import com.theeralabs.follome.view.location.PeriodicLocationUpdateService;
 import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
 import java.util.ArrayList;
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST_CODE = 1;
@@ -92,6 +80,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         .addToBackStack("peopleList").commit();
             }
         });
+        //Set User Name Text
+        TextView txtHelloUser = findViewById(R.id.txt_hello_name);
+        txtHelloUser.setText(new StringBuilder().append("Hello, ").append(user.getName()).toString());
+
+        //Set Logout Button
         Button btnLogout = findViewById(R.id.btn_logout);
         btnLogout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,9 +112,11 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        /*
         mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
+
                 points.add(latLng);
                 //Format for url
                 final LatLng o = points.get(points.size() - 1);
@@ -152,7 +147,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                             txtDuration.setVisibility(View.VISIBLE);
                             txtDistance.setText("Distance: " + leg.getDistance().getValue() + " Meters");
                             txtDuration.setText("Duration: " + (leg.getDuration().getValue()) / 60 + " Minutes");
-*/
                             List<Step> stepList = leg.getSteps();
                             for (Step step : stepList) {
                                 mMap.addPolyline(new PolylineOptions().addAll
@@ -167,9 +161,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
                     }
                 });
+
             }
         });
-
+        */
         mMap.getUiSettings().setRotateGesturesEnabled(true);
         mMap.getUiSettings().setTiltGesturesEnabled(true);
 

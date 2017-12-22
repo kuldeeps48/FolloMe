@@ -43,20 +43,34 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.maps.android.PolyUtil;
 import com.theeralabs.follome.R;
+import com.theeralabs.follome.api.ApiInterface;
+import com.theeralabs.follome.api.GoogleDirectionApiClient;
+import com.theeralabs.follome.model.directionMatrix.direction.DirectionMatrix;
+import com.theeralabs.follome.model.directionMatrix.direction.Leg;
+import com.theeralabs.follome.model.directionMatrix.direction.Route;
+import com.theeralabs.follome.model.directionMatrix.direction.Step;
 import com.theeralabs.follome.model.directionMatrix.user.User;
 import com.theeralabs.follome.util.OnSwipeTouchListener;
 import com.theeralabs.follome.view.location.PeriodicLocationUpdateService;
 import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
+import org.w3c.dom.Text;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST_CODE = 1;
@@ -67,6 +81,8 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     FragmentManager manager;
     private static GoogleMap mMap;
     private static Context mContext;
+    private static ArrayList<User> markedUsers;
+    private static TextView txtDistance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +129,13 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         });
 
+        //Set Distance text;
+        txtDistance = findViewById(R.id.txt_distance);
+        txtDistance.setVisibility(View.INVISIBLE);
         //Initialize points array to store LatLng
         points = new ArrayList<>();
+        markedUsers = new ArrayList<>();
+        markedUsers.add(user);
 
         //Start Map
         mapFragment.getMapAsync(this);
@@ -137,6 +158,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
 
     public static void addMarker(final User person) {
+        markedUsers.add(person);
         // add marker to Map
         Toast.makeText(mContext, "Adding On Map", Toast.LENGTH_SHORT).show();
         Glide.with(mContext)
@@ -157,9 +179,48 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                                 // Specifies the anchor to be at a particular point in the marker image.
                                 .anchor(0.5f, 1));
                         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18.0f));
+                        drawPath();
                     }
                 });
 
+    }
+
+    public static void drawPath() {
+        String origin = markedUsers.get(0).getLat() + "," + markedUsers.get(0).getLng();
+        String dest = markedUsers.get(markedUsers.size() - 1).getLat() + "," +
+                markedUsers.get(markedUsers.size() - 1).getLng();
+
+
+        ApiInterface apiInterface1 = GoogleDirectionApiClient.getClient().create(ApiInterface.class);
+        Call<DirectionMatrix> call1 = apiInterface1.getDirection(origin, dest, KEY_DIRECTION_MATRIX);
+        call1.enqueue(new Callback<DirectionMatrix>() {
+            @Override
+            public void onResponse(Call<DirectionMatrix> call, Response<DirectionMatrix> response) {
+                DirectionMatrix d = response.body();
+
+                if (d.getStatus().equalsIgnoreCase("OK")) {
+                    List<Route> routes = d.getRoutes();
+                    Route route = routes.get(0);
+                    List<Leg> legList = route.getLegs();
+                    Leg leg = legList.get(0);
+
+                    txtDistance.setVisibility(View.VISIBLE);
+                    txtDistance.setText(new StringBuilder().append("Distance: ").append(leg.getDistance().getValue()).append(" Meters").toString());
+
+                    List<Step> stepList = leg.getSteps();
+                    for (Step step : stepList) {
+                        mMap.addPolyline(new PolylineOptions().addAll
+                                (PolyUtil.decode(step.getPolyline().getPoints())));
+                    }
+                } else
+                    Toast.makeText(mContext, d.getStatus(), Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFailure(Call<DirectionMatrix> call, Throwable t) {
+
+            }
+        });
     }
 
     private static String getCompleteAddressString(double LATITUDE, double LONGITUDE) {

@@ -49,6 +49,7 @@ import java.util.ArrayList;
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST_CODE = 1;
     private static final String KEY_DIRECTION_MATRIX = "AIzaSyCuBz60QHNpCsZNgYdjWK_bdjRz9cW0_Gk";
+    private static final int LOCATION_SETTING = 7 ;
     private ArrayList<LatLng> points;
     private User user;
     FragmentManager manager;
@@ -70,6 +71,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
 
+        //Add Right swipe listener
         FrameLayout mainLayout = findViewById(R.id.map_main_layout);
         manager = getSupportFragmentManager();
         mainLayout.setOnTouchListener(new OnSwipeTouchListener(getApplicationContext()) {
@@ -80,6 +82,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                         .addToBackStack("peopleList").commit();
             }
         });
+
         //Set User Name Text
         TextView txtHelloUser = findViewById(R.id.txt_hello_name);
         txtHelloUser.setText(new StringBuilder().append("Hello, ").append(user.getName()).toString());
@@ -96,7 +99,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             }
         });
 
+        //Initialize points array to store LatLng
         points = new ArrayList<>();
+
+        //Start Map
         mapFragment.getMapAsync(this);
     }
 
@@ -169,7 +175,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         mMap.getUiSettings().setTiltGesturesEnabled(true);
 
         checkPermission();
-        init();
     }
 
 
@@ -202,8 +207,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18.0f));
                                 points.add(currentLocation);
                                 addUserLocationToFirebase(currentLocation);
-
-                                startBackgroundService();
                             }
                         }
                     });
@@ -232,12 +235,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         Toast.makeText(this, "Your location updated", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        isLocationEnabled();
-        init();
-    }
 
     LocationManager locationManager;
 
@@ -252,7 +249,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             alertDialog.setPositiveButton("Location Settings", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                    startActivity(intent);
+                    startActivityForResult(intent, LOCATION_SETTING);
                 }
             });
             alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -262,9 +259,19 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             });
             AlertDialog alert = alertDialog.create();
             alert.show();
-        } else
+        } else {
             startBackgroundService();
+            init();
+        }
     }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == LOCATION_REQUEST_CODE) {
+            isLocationEnabled();
+        }
+    }
+
 
     //Location Permission///////////////////////////////////////////////////////////////////////////
     public void checkPermission() {
@@ -274,6 +281,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         } else {
             mMap.setMyLocationEnabled(true);
             mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            isLocationEnabled();
         }
     }
 

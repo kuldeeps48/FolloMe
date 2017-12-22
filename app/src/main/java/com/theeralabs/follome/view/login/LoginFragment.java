@@ -128,7 +128,7 @@ public class LoginFragment extends Fragment {
                                     progressBar.setVisibility(View.GONE);
 
                                     User u = dataSnapshot.getValue(User.class);
-                                    Intent intent = new Intent(getActivity(), MapActivity.class);
+                                    Intent intent = new Intent(getContext(), MapActivity.class);
                                     intent.putExtra("userObject", u);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                                     startActivity(intent);

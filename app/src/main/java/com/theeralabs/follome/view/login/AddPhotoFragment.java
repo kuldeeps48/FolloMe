@@ -12,7 +12,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
@@ -28,12 +27,12 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.theeralabs.follome.R;
@@ -118,8 +117,8 @@ public class AddPhotoFragment extends Fragment {
             Toast.makeText(getActivity(), "Add an image", Toast.LENGTH_SHORT).show();
             return;
         }
-
         btnSetPhoto.setEnabled(false);
+
         //Create small image
         InputStream image_stream = null;
         try {
@@ -128,17 +127,21 @@ public class AddPhotoFragment extends Fragment {
             e.printStackTrace();
         }
         Bitmap bitmap= BitmapFactory.decodeStream(image_stream);
+        Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
+                (int) (bitmap.getWidth() * 0.07),
+                (int) (bitmap.getHeight() * 0.07), true);
         File file = createImageFile();
         if (file != null) {
             FileOutputStream fout;
             try {
                 fout = new FileOutputStream(file);
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 70, fout);
+                scaled.compress(Bitmap.CompressFormat.JPEG, 70, fout);
                 fout.flush();
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+
         Uri compressedImageUri = Uri.fromFile(file);
 
         //Upload to Firebase storage
@@ -149,19 +152,19 @@ public class AddPhotoFragment extends Fragment {
 
         progressBar.setVisibility(View.VISIBLE);
         Toast.makeText(getContext(), "Uploading...", Toast.LENGTH_SHORT).show();
-        uploadTask.addOnFailureListener(new OnFailureListener() {
+        uploadTask
+                .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         btnSetPhoto.setEnabled(true);
                         Toast.makeText(getContext(), "Upload Failed. Try again", Toast.LENGTH_SHORT).show();
                     }
                 })
-
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
                     @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                         //Get firebase image uri
-                        Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
+                        Uri downloadUrl = task.getResult().getMetadata().getDownloadUrl();
                         registeredUser.setPhotoUri(downloadUrl.toString());
 
                         //Store in firebase database for future reference
@@ -179,7 +182,6 @@ public class AddPhotoFragment extends Fragment {
                         getActivity().finish();
                     }
                 });
-
     }
 
     public File createImageFile() {

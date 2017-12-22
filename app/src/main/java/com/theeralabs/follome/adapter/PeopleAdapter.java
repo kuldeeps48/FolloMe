@@ -14,10 +14,15 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.theeralabs.follome.R;
 import com.theeralabs.follome.model.directionMatrix.user.User;
+import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
 import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by kuldeep on 21/12/17.
@@ -26,13 +31,12 @@ import java.util.List;
 public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.ViewHolder> {
     private View view;
     private List<User> mResults;
-    public static List<String> imgPaths;
     private Context mContext;
 
     public PeopleAdapter(List<User> resultList, Context context) {
         mResults = resultList;
         mContext = context;
-        imgPaths = new ArrayList<>(mResults.size());
+
     }
 
     @Override
@@ -49,19 +53,6 @@ public class PeopleAdapter extends RecyclerView.Adapter<PeopleAdapter.ViewHolder
         Glide.with(mContext)
                 .load(mResults.get(position).getPhotoUri())
                 .into(holder.img_photo);
-
-        //Store image into disk
-        Glide.with(mContext)
-                .downloadOnly()
-                .apply(new RequestOptions().override(50, 50))
-                .load(mResults.get(position).getPhotoUri())
-                .into(new SimpleTarget<File>() {
-                    @Override
-                    public void onResourceReady(File resource, Transition<? super File> transition) {
-                        imgPaths.add(resource.getAbsolutePath());
-                    }
-                });
-
 
     }
 

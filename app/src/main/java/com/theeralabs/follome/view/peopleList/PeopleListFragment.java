@@ -52,10 +52,11 @@ public class PeopleListFragment extends Fragment {
         return v;
     }
 
-    private void showPersonOnMap(User listPerson, int position) {
-        MapActivity.addMarker(listPerson, position);
+    private void showPersonOnMap(User listPerson) {
+        MapActivity.addMarker(listPerson);
         getActivity().getSupportFragmentManager().popBackStack();
     }
+    public static List<String> imgPaths;
 
     List<User> userList;
     private void getPeopleList() {
@@ -76,7 +77,7 @@ public class PeopleListFragment extends Fragment {
                             @Override
                             public void onItemClick(View view, int position) {
                                 User listPerson = userList.get(position);
-                                showPersonOnMap(listPerson, position);
+                                showPersonOnMap(listPerson);
                             }
                         }));
                         recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));

@@ -8,12 +8,13 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -24,6 +25,12 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.Request;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.SizeReadyCallback;
+import com.bumptech.glide.request.target.Target;
+import com.bumptech.glide.request.transition.Transition;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -38,18 +45,18 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.theeralabs.follome.R;
-import com.theeralabs.follome.adapter.PeopleAdapter;
 import com.theeralabs.follome.model.directionMatrix.user.User;
 import com.theeralabs.follome.util.OnSwipeTouchListener;
 import com.theeralabs.follome.view.location.PeriodicLocationUpdateService;
 import com.theeralabs.follome.view.peopleList.PeopleListFragment;
 
+import java.io.File;
 import java.util.ArrayList;
 
 public class MapActivity extends FragmentActivity implements OnMapReadyCallback {
     private static final int LOCATION_REQUEST_CODE = 1;
     private static final String KEY_DIRECTION_MATRIX = "AIzaSyCuBz60QHNpCsZNgYdjWK_bdjRz9cW0_Gk";
-    private static final int LOCATION_SETTING = 7 ;
+    private static final int LOCATION_SETTING = 7;
     private ArrayList<LatLng> points;
     private User user;
     FragmentManager manager;
@@ -78,8 +85,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             @Override
             public void onSwipeRight() {
                 super.onSwipeRight();
-                manager.beginTransaction().add(R.id.map, new PeopleListFragment(), "peopleList")
-                        .addToBackStack("peopleList").commit();
+                if (manager.getBackStackEntryCount() == 0) {
+                    manager.beginTransaction().add(R.id.map, new PeopleListFragment(), "peopleList")
+                            .addToBackStack("peopleList").commit();
+                }
             }
         });
 
@@ -117,84 +126,41 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        /*
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-
-                points.add(latLng);
-                //Format for url
-                final LatLng o = points.get(points.size() - 1);
-                final String origin = o.latitude + "," + o.longitude;
-                final LatLng d = points.get(points.size() - 2);
-                String dest = d.latitude + "," + d.longitude;
-
-                mMap.clear();
-                mMap.addMarker(new MarkerOptions().position(latLng)
-                        .title("Destination"));
-                mMap.addMarker(new MarkerOptions().position(points.get(points.size() - 2))
-                        .title("Origin").alpha(0.6f));
-
-                ApiInterface apiInterface1 = GoogleDirectionApiClient.getClient().create(ApiInterface.class);
-                Call<DirectionMatrix> call1 = apiInterface1.getDirection(origin, dest, KEY_DIRECTION_MATRIX);
-                call1.enqueue(new Callback<DirectionMatrix>() {
-                    @Override
-                    public void onResponse(Call<DirectionMatrix> call, Response<DirectionMatrix> response) {
-                        DirectionMatrix d = response.body();
-
-                        if (d.getStatus().equalsIgnoreCase("OK")) {
-                            List<Route> routes = d.getRoutes();
-                            Route route = routes.get(0);
-                            List<Leg> legList = route.getLegs();
-                            Leg leg = legList.get(0);
-
-                            /*txtDistance.setVisibility(View.VISIBLE);
-                            txtDuration.setVisibility(View.VISIBLE);
-                            txtDistance.setText("Distance: " + leg.getDistance().getValue() + " Meters");
-                            txtDuration.setText("Duration: " + (leg.getDuration().getValue()) / 60 + " Minutes");
-                            List<Step> stepList = leg.getSteps();
-                            for (Step step : stepList) {
-                                mMap.addPolyline(new PolylineOptions().addAll
-                                        (PolyUtil.decode(step.getPolyline().getPoints())));
-                            }
-                        } else
-                            Toast.makeText(getApplicationContext(), d.getStatus(), Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onFailure(Call<DirectionMatrix> call, Throwable t) {
-
-                    }
-                });
-
-            }
-        });
-        */
-        mMap.getUiSettings().setRotateGesturesEnabled(true);
-        mMap.getUiSettings().setTiltGesturesEnabled(true);
-
-        checkPermission();
+        startBackgroundService();
+        isLocationEnabled();
     }
 
 
-    public static void addMarker(User person, int position) {
+    public static void addMarker(final User person) {
         // add marker to Map
-        LatLng latLng = new LatLng(person.getLat(), person.getLng());
-        Bitmap bm = BitmapFactory.decodeFile(PeopleAdapter.imgPaths.get(position));
-        Bitmap scaled = Bitmap.createScaledBitmap(bm,
-                (int) (bm.getWidth() * 0.07),
-                (int) (bm.getHeight() * 0.07), true);
-        mMap.addMarker(new MarkerOptions()
-                .icon(BitmapDescriptorFactory.fromBitmap(scaled))
-                .position(latLng)
-                // Specifies the anchor to be at a particular point in the marker image.
-                .anchor(0.5f, 1));
+        Toast.makeText(mContext, "Adding On Map", Toast.LENGTH_SHORT).show();
+        Glide.with(mContext)
+                .asFile()
+                .load(person.getPhotoUri())
+                .into(new SimpleTarget<File>() {
+                    @Override
+                    public void onResourceReady(File resource, Transition<? super File> transition) {
+                        LatLng latLng = new LatLng(person.getLat(), person.getLng());
+                        Bitmap bm = BitmapFactory.decodeFile(resource.getPath());
+                        //Bitmap scaled = Bitmap.createScaledBitmap(bm,
+                        //        (int) (bm.getWidth() * 0.07),
+                        //        (int) (bm.getHeight() * 0.07), true);
+                        mMap.addMarker(new MarkerOptions()
+                                .icon(BitmapDescriptorFactory.fromBitmap(bm))
+                                .position(latLng)
+                                // Specifies the anchor to be at a particular point in the marker image.
+                                .anchor(0.5f, 1));
+                    }
+                });
 
     }
 
     public void init() {
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            mMap.setMyLocationEnabled(true);
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            mMap.getUiSettings().setRotateGesturesEnabled(true);
+            mMap.getUiSettings().setTiltGesturesEnabled(true);
             FusedLocationProviderClient mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
             mFusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
@@ -216,7 +182,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
     private void startBackgroundService() {
         //Start background location update service
-        Intent intent = new Intent(MapActivity.this, PeriodicLocationUpdateService.class);
+        Intent intent = new Intent(this, PeriodicLocationUpdateService.class);
         intent.putExtra("userObject", user);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             startForegroundService(intent);
@@ -260,7 +226,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
             AlertDialog alert = alertDialog.create();
             alert.show();
         } else {
-            startBackgroundService();
             init();
         }
     }
@@ -272,23 +237,4 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
         }
     }
 
-
-    //Location Permission///////////////////////////////////////////////////////////////////////////
-    public void checkPermission() {
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_REQUEST_CODE);
-            Toast.makeText(getApplicationContext(), "Location Permission Required", Toast.LENGTH_SHORT).show();
-        } else {
-            mMap.setMyLocationEnabled(true);
-            mMap.getUiSettings().setMyLocationButtonEnabled(true);
-            isLocationEnabled();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == LOCATION_REQUEST_CODE) {
-            checkPermission();
-        }
-    }
 }

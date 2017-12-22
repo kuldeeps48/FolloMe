@@ -18,6 +18,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +28,8 @@ import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -126,10 +126,10 @@ public class AddPhotoFragment extends Fragment {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-        Bitmap bitmap= BitmapFactory.decodeStream(image_stream);
-        Bitmap scaled = Bitmap.createScaledBitmap(bitmap,
-                (int) (bitmap.getWidth() * 0.07),
-                (int) (bitmap.getHeight() * 0.07), true);
+        Bitmap b = BitmapFactory.decodeStream(image_stream);
+        Bitmap scaled = Bitmap.createScaledBitmap(b,
+                (int) (b.getWidth() * 0.07),
+                (int) (b.getHeight() * 0.07), true);
         File file = createImageFile();
         if (file != null) {
             FileOutputStream fout;
@@ -160,11 +160,12 @@ public class AddPhotoFragment extends Fragment {
                         Toast.makeText(getContext(), "Upload Failed. Try again", Toast.LENGTH_SHORT).show();
                     }
                 })
-                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                         //Get firebase image uri
-                        Uri downloadUrl = task.getResult().getMetadata().getDownloadUrl();
+                        Log.d("AddPhotoFrag", "onSuccess: Upload Success");
+                        Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
                         registeredUser.setPhotoUri(downloadUrl.toString());
 
                         //Store in firebase database for future reference
@@ -173,15 +174,21 @@ public class AddPhotoFragment extends Fragment {
                         myRef.child(registeredUser.getId()).setValue(registeredUser);
 
                         //Start Map activity
-                        Intent intent = new Intent(getContext(), MapActivity.class);
-                        intent.putExtra("userObject", registeredUser);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                        startActivity(intent);
+                        try {
+                            Intent intent = new Intent(getContext(), MapActivity.class);
+                            intent.putExtra("userObject", registeredUser);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                            startActivity(intent);
 
-                        //Finish LoginActivity
-                        getActivity().finish();
+                            //Finish LoginActivity
+                            getActivity().finish();
+                        } catch (Exception e) {
+                            e.getStackTrace();
+                        }
                     }
+
                 });
+
     }
 
     public File createImageFile() {

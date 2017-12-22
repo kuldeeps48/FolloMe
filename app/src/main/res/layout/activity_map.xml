@@ -2,6 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:id="@+id/map_main_layout"
+    android:background="@drawable/gradient_background"
     android:layout_height="match_parent">
 
     <ImageView
@@ -21,23 +22,25 @@
     <Button
         android:id="@+id/btn_logout"
         android:layout_width="100dp"
-        android:layout_marginTop="5dp"
         android:layout_gravity="end|top"
-        android:layout_marginEnd="8dp"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:background="@drawable/button_shape"
-        android:elevation="3dp"
-        android:textColor="#cccccc"
+        android:textColor="@android:color/white"
         android:text="Logout" />
 
     <TextView
         android:id="@+id/txt_hello_name"
         android:layout_width="wrap_content"
-        android:layout_height="40dp"
+        android:layout_height="50dp"
         android:layout_gravity="center|top"
-        android:layout_marginTop="12dp"
+        android:fontFamily="sans-serif-smallcaps"
+        android:paddingBottom="8dp"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        android:paddingTop="14dp"
         android:text="Hello, TestName"
         android:textAlignment="center"
+        android:textColor="@android:color/white"
         android:textSize="20sp" />
 
     <TextView
@@ -47,8 +50,10 @@
         android:layout_gravity="start|top"
         android:layout_marginStart="45dp"
         android:layout_marginTop="17dp"
+        android:fontFamily="casual"
         android:text="Swipe Right"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:textSize="10sp"
         android:textStyle="bold|italic" />
 
     <TextView
@@ -56,10 +61,10 @@
         android:layout_width="wrap_content"
         android:layout_height="40dp"
         android:layout_gravity="center|top"
-        android:layout_marginTop="55dp"
+        android:layout_marginTop="50dp"
         android:padding="8dp"
         android:text="Distance: "
-        android:background="@android:color/black"
+        android:background="@color/colorPrimaryDark"
         android:textColor="@android:color/white"
         android:textAlignment="center"
         android:textSize="16sp" />

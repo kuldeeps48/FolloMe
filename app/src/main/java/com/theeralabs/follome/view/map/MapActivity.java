@@ -158,6 +158,7 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
 
 
     public static void addMarker(final User person) {
+        mMap.clear();
         markedUsers.add(person);
         // add marker to Map
         Toast.makeText(mContext, "Adding On Map", Toast.LENGTH_SHORT).show();
@@ -169,9 +170,6 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     public void onResourceReady(File resource, Transition<? super File> transition) {
                         LatLng latLng = new LatLng(person.getLat(), person.getLng());
                         Bitmap bm = BitmapFactory.decodeFile(resource.getPath());
-                        //Bitmap scaled = Bitmap.createScaledBitmap(bm,
-                        //        (int) (bm.getWidth() * 0.07),
-                        //        (int) (bm.getHeight() * 0.07), true);
                         mMap.addMarker(new MarkerOptions()
                                 .icon(BitmapDescriptorFactory.fromBitmap(bm))
                                 .position(latLng)
@@ -205,7 +203,10 @@ public class MapActivity extends FragmentActivity implements OnMapReadyCallback 
                     Leg leg = legList.get(0);
 
                     txtDistance.setVisibility(View.VISIBLE);
-                    txtDistance.setText(new StringBuilder().append("Distance: ").append(leg.getDistance().getValue()).append(" Meters").toString());
+                    if (leg.getDistance().getValue() < 1000) {
+                        txtDistance.setText(new StringBuilder().append("Distance: ").append(leg.getDistance().getValue()).append(" Meters").toString());
+                    } else
+                        txtDistance.setText(new StringBuilder().append("Distance: ").append((leg.getDistance().getValue()) / 1000).append(" KM").toString());
 
                     List<Step> stepList = leg.getSteps();
                     for (Step step : stepList) {
